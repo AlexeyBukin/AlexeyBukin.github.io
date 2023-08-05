@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Pig latin</title>
+    <script type="text/javascript" src="https://dartpad.dev/inject_embed.dart.js" defer></script>
+    <style>
+        .dartpad-embed>* {
+            width: 100%;
+        }
+
+        iframe {
+            border: 1px solid #bfbfbf;
+            width: 100%;
+            height: 600px;
+            margin-bottom: 40px;
+            margin-top: 40px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Pig latin</h1>
+    <p>
+        Implement a program that translates from English to Pig Latin.
+
+        Pig Latin is a made-up children's language that's intended to be confusing. It obeys a few simple rules (below),
+        but when it's spoken quickly it's really difficult for non-children (and non-native speakers) to understand.
+
+        Rule 1: If a word begins with a vowel sound, add an "ay" sound to the end of the word. Please note that "xr" and
+        "yt" at the beginning of a word make vowel sounds (e.g. "xray" -> "xrayay", "yttria" -> "yttriaay").
+        Rule 2: If a word begins with a consonant sound, move it to the end of the word and then add an "ay" sound to
+        the end of the word. Consonant sounds can be made up of multiple consonants, a.k.a. a consonant cluster (e.g.
+        "chair" -> "airchay").
+        Rule 3: If a word starts with a consonant sound followed by "qu", move it to the end of the word, and then add
+        an "ay" sound to the end of the word (e.g. "square" -> "aresquay").
+        Rule 4: If a word contains a "y" after a consonant cluster or as the second letter in a two letter word it makes
+        a vowel sound (e.g. "rhythm" -> "ythmrhay", "my" -> "ymay").
+        There are a few more rules for edge cases, and there are regional variants too.
+
+        Read more about Pig Latin on Wikipedia.
+    </p>
+
+    <p>Dart excercise with tests</p>
+    <pre>
+            <code class="language-run-dartpad:mode-dart">
+{$ begin main.dart $}
+// Translate the word!
+String translate(String word) {
+    return word;
+}
+{$ end main.dart $}
+
+{$ begin test.dart $}
+
+void main() {
+    try {
+        group('PigLatin', () {
+            group('ay is added to words that start with vowels', () {
+              test('word beginning with a', () {
+                final result = translate('apple');
+                expect(result, 'appleay');
+              });
+              test('word beginning with e', () {
+                final result = translate('ear');
+                expect(result, 'earay');
+              });
+              test('word beginning with i', () {
+                final result = translate('igloo');
+                expect(result, 'iglooay');
+              });
+              test('word beginning with o', () {
+                final result = translate('object');
+                expect(result, 'objectay');
+              });
+              test('word beginning with u', () {
+                final result = translate('under');
+                expect(result, 'underay');
+              });
+              test('word beginning with a vowel and followed by a qu', () {
+                final result = translate('equal');
+                expect(result, 'equalay');
+              });
+            });
+            group('first letter and ay are moved to the end of words that start with consonants', () {
+              test('word beginning with p', () {
+                final result = translate('pig');
+                expect(result, 'igpay');
+              });
+              test('word beginning with k', () {
+                final result = translate('koala');
+                expect(result, 'oalakay');
+              });
+              test('word beginning with x', () {
+                final result = translate('xenon');
+                expect(result, 'enonxay');
+              });
+              test('word beginning with q without a following u', () {
+                final result = translate('qat');
+                expect(result, 'atqay');
+              });
+            });
+            group('some letter clusters are treated like a single consonant', () {
+              test('word beginning with ch', () {
+                final result = translate('chair');
+                expect(result, 'airchay');
+              });
+              test('word beginning with qu', () {
+                final result = translate('queen');
+                expect(result, 'eenquay');
+              });
+              test('word beginning with qu and a preceding consonant', () {
+                final result = translate('square');
+                expect(result, 'aresquay');
+              });
+              test('word beginning with th', () {
+                final result = translate('therapy');
+                expect(result, 'erapythay');
+              });
+              test('word beginning with thr', () {
+                final result = translate('thrush');
+                expect(result, 'ushthray');
+              });
+              test('word beginning with sch', () {
+                final result = translate('school');
+                expect(result, 'oolschay');
+              });
+            });
+            group('some letter clusters are treated like a single vowel', () {
+              test('word beginning with yt', () {
+                final result = translate('yttria');
+                expect(result, 'yttriaay');
+              });
+              test('word beginning with xr', () {
+                final result = translate('xray');
+                expect(result, 'xrayay');
+              });
+            });
+            group('position of y in a word determines if it is a consonant or a vowel', () {
+              test('y is treated like a consonant at the beginning of a word', () {
+                final result = translate('yellow');
+                expect(result, 'ellowyay');
+              });
+              test('y is treated like a vowel at the end of a consonant cluster', () {
+                final result = translate('rhythm');
+                expect(result, 'ythmrhay');
+              });
+              test('y as second letter in two letter word', () {
+                final result = translate('my');
+                expect(result, 'ymay');
+              });
+            });
+            group('phrases are translated', () {
+              test('a whole phrase', () {
+                final result = translate('quick fast run');
+                expect(result, 'ickquay astfay unray');
+              });
+            });
+          });
+          _result(true, ['All tests passed!']);
+    } on PiglatinException catch (e) {
+        final strings = [
+            for (PiglatinException? pge = e; pge != null; pge = pge.prev) 
+                pge.message
+        ];
+        _result(false, strings);
+    }    
+}
+
+class PiglatinException implements Exception {
+    final PiglatinException? prev;
+    final String message;
+    PiglatinException(this.message, this.prev);
+}
+
+void group(String message, Function f) {
+    try {
+        f.call();
+        print('Group passed: $message');
+    } on PiglatinException catch (e) {
+        throw PiglatinException('Failed group: $message', e); 
+    }
+}
+
+void test(String message, Function f) {
+    try {
+        f.call();
+        print(' > Test passed: $message');
+    } on PiglatinException catch (e) {
+        throw PiglatinException('Failed test: $message', e); 
+    }
+}
+
+void expect(String a, String b) {
+    if (a != b) {
+        throw PiglatinException('String "$a" is not equal to string "$b"', null); 
+    }
+}
+{$ end test.dart $}
+            </code>
+        </pre>
+</body>
+
+</html>
